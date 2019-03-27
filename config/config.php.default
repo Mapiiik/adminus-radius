@@ -1,0 +1,30 @@
+<?php
+// Last sync file - timestamp value of last successfull sync will be saved here
+define('LAST_SYNC_FILE', 'config/last_sync');
+
+// Adminus CRM connection
+define('API_HOST', 'https://adminus/api');
+define('API_USER', 'api-remote');
+define('API_PASS', '');
+
+// Adminus CRM attributes
+define('ATTRIBUTE_USER', 'Username');
+define('ATTRIBUTE_PASS', 'Password');
+
+// Adminus CRM technical parameters
+define('PARAMETER_SPEED_UPLOAD', 'internet.speed_up');
+define('PARAMETER_SPEED_DOWNLOAD', 'internet.speed_down');
+
+// Radius DB
+define('RADIUS_DB_PDO', 'pgsql:host=dbserver;port=5432;dbname=database;user=user;password=password');
+define('RADIUS_DB_RESET_SEQUENCES', true); // reset sequences (for example PostgreSQL)
+
+// Radius attributes
+define('RADIUS_ATTRIBUTE_IPV4_ADDRESS', 'Framed-IP-Address');
+define('RADIUS_ATTRIBUTE_IPV6_PREFIX', 'Framed-IPv6-Prefix');
+define('RADIUS_ATTRIBUTE_SPEED_LIMIT', 'Mikrotik-Rate-Limit');
+
+// Report ALL
+error_reporting(E_ALL);
+
+?>
