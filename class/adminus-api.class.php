@@ -18,24 +18,36 @@ function loadJson($query)
 	// API authorization
 	if (!function_exists('curl_init'))
 	{
+		// without cURL and cookies
 		$context = stream_context_create(array(
-		    'http' => array(
-		        'header'  => "Authorization: Basic " . base64_encode($this->user . ':' . $this->pass),
-			'ignore_errors' => true // because Adminus returns 404 if "No items found"
-		    )
+			'http' => array(
+				'header'  => "Authorization: Basic " . base64_encode($this->user . ':' . $this->pass),
+				'ignore_errors' => true // because Adminus returns 404 if "No items found"
+			)
 		));
 		$json = @file_get_contents($this->host . $query, false, $context);
 	}
 	else
 	{
+		// with cURL and cookies (no authorization if possible)
 		$curl = curl_init($this->host . $query);
-		curl_setopt($curl, CURLOPT_USERPWD, $this->user . ':' . $this->pass);
+		if ($this->cookie) curl_setopt($curl, CURLOPT_COOKIEFILE, $this->cookie);
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-		if ($this->cookie) curl_setopt($curl, CURLOPT_COOKIEJAR, $this->cookie);
 		$json = curl_exec($curl);
+		
+		// auhorization if needed
+		if (curl_getinfo($curl, CURLINFO_HTTP_CODE) == 401)
+		{
+			echo 'Re-authorization...' . "\n";
+			curl_setopt($curl, CURLOPT_USERPWD, $this->user . ':' . $this->pass);
+			if ($this->cookie) curl_setopt($curl, CURLOPT_COOKIEJAR, $this->cookie);
+			$json = curl_exec($curl);
+		}
+		curl_close($curl);
 	}
 
 	$decode = json_decode($json);
+
 	if (isset($decode->code) && ($decode->code == 200)) return $decode;
 	if (isset($decode->code) && ($decode->code == 404)) return $decode;
 	return false;
