@@ -9,9 +9,20 @@ echo '****************************************' . "\n";
 echo '* Updating changed contracts in Radius *' . "\n";
 echo '****************************************' . "\n";
 
+// Connect to Radius DB
+echo 'Connecting to Radius DB... ';
+if ($db = new PDO(RADIUS_DB_PDO))
+{
+	echo 'OK' . "\n";
+}
+else
+{
+	die('Problem with DB connection' . "\n");
+}
+
 // START load data from Adminus CRM
 echo 'Loading changed customers since ' . date(DATE_ATOM, $last_sync) . ' from Adminus CRM... ' . "\n";
-$api = new AdminusAPI(API_HOST, API_USER, API_PASS);
+$api = new AdminusAPI(API_HOST, API_USER, API_PASS, COOKIE_FILE);
 
 $customers = $api->loadJson('/customer-detail/by-last-change-from/' . $last_sync);
 if ($customers === false) die('Failure when loading changed users from Adminus CRM' . "\n");
@@ -64,9 +75,9 @@ echo 'Loading done' . "\n";
 // END load data from Adminus CRM
 
 // START update data in Radius DB
-echo 'Updating data in Radius DB... ';
-if ($db = new PDO(RADIUS_DB_PDO))
+if ($db)
 {
+	echo 'Updating data in Radius DB... ';
 	$db->beginTransaction();
 
 	$insert_radcheck = $db->prepare('INSERT INTO radcheck(username, attribute, op, value, "insertId", "insertDate", "typeId", "customerId", "contractId") VALUES (:username, \'Password\', \'==\', :password, 0, NOW(), 0, :customerId, :contractId);');

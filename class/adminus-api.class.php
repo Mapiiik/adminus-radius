@@ -5,24 +5,36 @@ private $host;
 private $user;
 private $pass;
 
-function __construct($host, $user, $pass)
+function __construct($host, $user, $pass, $cookie = false)
 {
 	$this->host = $host;
 	$this->user = $user;
 	$this->pass = $pass;
+	$this->cookie = $cookie;
 }
 
 function loadJson($query)
 {
 	// API authorization
-	$context = stream_context_create(array(
-	    'http' => array(
-	        'header'  => "Authorization: Basic " . base64_encode($this->user . ':' . $this->pass),
-		'ignore_errors' => true // because Adminus returns 404 if "No items found"
-	    )
-	));
+	if (!function_exists('curl_init'))
+	{
+		$context = stream_context_create(array(
+		    'http' => array(
+		        'header'  => "Authorization: Basic " . base64_encode($this->user . ':' . $this->pass),
+			'ignore_errors' => true // because Adminus returns 404 if "No items found"
+		    )
+		));
+		$json = @file_get_contents($this->host . $query, false, $context);
+	}
+	else
+	{
+		$curl = curl_init($this->host . $query);
+		curl_setopt($curl, CURLOPT_USERPWD, $this->user . ':' . $this->pass);
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+		if ($this->cookie) curl_setopt($curl, CURLOPT_COOKIEJAR, $this->cookie);
+		$json = curl_exec($curl);
+	}
 
-	$json = @file_get_contents($this->host . $query, false, $context);
 	$decode = json_decode($json);
 	if (isset($decode->code) && ($decode->code == 200)) return $decode;
 	if (isset($decode->code) && ($decode->code == 404)) return $decode;

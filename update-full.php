@@ -8,9 +8,20 @@ echo '************************************************************' . "\n";
 echo '* Updating all contracts in Radius (full reset and reload) *' . "\n";
 echo '************************************************************' . "\n";
 
+// Connect to Radius DB
+echo 'Connecting to Radius DB... ';
+if ($db = new PDO(RADIUS_DB_PDO))
+{
+	echo 'OK' . "\n";
+}
+else
+{
+	die('Problem with DB connection' . "\n");
+}
+
 // START load data from Adminus CRM
 echo 'Loading active contracts from Adminus CRM... ' . "\n";
-$api = new AdminusAPI(API_HOST, API_USER, API_PASS);
+$api = new AdminusAPI(API_HOST, API_USER, API_PASS, COOKIE_FILE);
 $contracts = $api->loadJson('/contract-detail/only-active');
 
 if (!(isset($contracts->data) && is_array($contracts->data))) die('Failure when loading active contracts from Adminus CRM' . "\n");
@@ -54,9 +65,9 @@ unset($api);
 // END load data from Adminus CRM
 
 // START save data do Radius DB
-echo 'Saving data to Radius DB... ';
-if ($db = new PDO(RADIUS_DB_PDO))
+if ($db)
 {
+	echo 'Saving data to Radius DB... ';
 	$db->beginTransaction();
 	$truncate_radcheck = $db->prepare('TRUNCATE TABLE radcheck;');
 	if (!$truncate_radcheck->execute()) die($truncate_radcheck->errorInfo()[2]);

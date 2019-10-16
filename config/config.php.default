@@ -1,6 +1,7 @@
 <?php
 // Last sync file - timestamp value of last successfull sync will be saved here
 define('LAST_SYNC_FILE', 'config/last_sync');
+define('COOKIE_FILE', 'config/cookie');
 
 // Adminus CRM connection
 define('API_HOST', 'https://adminus/api');
