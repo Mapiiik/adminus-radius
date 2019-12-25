@@ -84,16 +84,19 @@ if ($db)
 		if (!$sequence_restart_radreply->execute()) die($sequence_restart_radreply->errorInfo()[2]);
 	}
 
-	$insert_radcheck = $db->prepare('INSERT INTO radcheck(username, attribute, op, value, "insertId", "insertDate", "typeId", "customerId", "contractId") VALUES (:username, \'Password\', \'==\', :password, 0, NOW(), 0, :customerId, :contractId);');
+	$insert_radcheck = $db->prepare('INSERT INTO radcheck(username, attribute, op, value, "customerId", "contractId") VALUES (:username, :attribute, \':=\', :value, :customerId, :contractId);');
 	$insert_radreply = $db->prepare('INSERT INTO radreply(username, attribute, op, value) VALUES (:username, :attribute, \'=\', :value);');
 
 	foreach ($radius as $radius_item)
 	{
-		$insert_radcheck->bindParam(':username', $radius_item->auth->username);
-		$insert_radcheck->bindParam(':password', $radius_item->auth->password);
-		$insert_radcheck->bindParam(':customerId', $radius_item->customer_id);
-		$insert_radcheck->bindParam(':contractId', $radius_item->contract_id);
-		if (!$insert_radcheck->execute()) die($insert_radcheck->errorInfo()[2]);
+		if (!$insert_radcheck->execute(array(
+			':username' => $radius_item->auth->username,
+			':attribute' => RADIUS_ATTRIBUTE_PASSWORD,
+			':value' => $radius_item->auth->password,
+			':customerId' => $radius_item->customer_id,
+			':contractId' => $radius_item->contract_id,
+		))) die($insert_radcheck->errorInfo()[2]);
+
 
 		foreach ($radius_item->network->ipv4->address as $ipv4)
 		{

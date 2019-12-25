@@ -21,6 +21,7 @@ define('RADIUS_DB_PDO', 'pgsql:host=dbserver;port=5432;dbname=database;user=user
 define('RADIUS_DB_RESET_SEQUENCES', true); // reset sequences (for example PostgreSQL)
 
 // Radius attributes
+define('RADIUS_ATTRIBUTE_PASSWORD', 'Cleartext-Password');
 define('RADIUS_ATTRIBUTE_IPV4_ADDRESS', 'Framed-IP-Address');
 define('RADIUS_ATTRIBUTE_IPV6_PREFIX', 'Framed-IPv6-Prefix');
 define('RADIUS_ATTRIBUTE_SPEED_LIMIT', 'Mikrotik-Rate-Limit');
